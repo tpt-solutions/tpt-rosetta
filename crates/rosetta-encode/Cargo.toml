@@ -1,0 +1,15 @@
+[package]
+name = "rosetta-encode"
+description = "Surface encodings and DSL parser for TPT Rosetta (experimental)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+rosetta-core = { path = "../rosetta-core" }
+
+[lints]
+workspace = true

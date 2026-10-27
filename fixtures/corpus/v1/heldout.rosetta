@@ -1,0 +1,139 @@
+# category: rust-coding
+# expect: actionable
+R1 heldout-01
+OBJ "Add a retry_with_backoff helper in example-ledger for transient HTTP 503 responses, using exponential delay capped at 8 seconds."
+SCOPE "crates/example-ledger/src/retry.rs"
+DO "Implement retry_with_backoff taking a closure and a maximum attempt count."
+MUST "Retry only on HTTP 503 responses."
+MUST_NOT "Sleep longer than 8 seconds between attempts."
+SHOULD "Return the last error when attempts are exhausted."
+ACCEPT "Unit tests cover success on the second attempt and exhaustion after the maximum."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+SRC "Add retries for the 503s from the ledger API, with backoff."
+---
+# category: bug-fixing
+# expect: actionable
+R1 heldout-02
+OBJ "Fix the CSV importer in example-ledger so a trailing comma does not create an extra empty column."
+SCOPE "crates/example-ledger/src/import/csv.rs"
+MUST "Keep rows with a genuinely empty middle column intact."
+MUST_NOT "Change the importer output for files without trailing commas."
+ACCEPT "A regression test with a trailing comma yields the same column count as its header."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+---
+# category: test-generation
+# expect: actionable
+R1 heldout-03
+OBJ "Write table-driven tests for the amount parser in example-ledger covering negative values, zero, and thousands separators."
+SCOPE "crates/example-ledger/src/amount.rs"
+DO "Add a test table with at least 12 cases, including rejected inputs."
+MUST "Use only the standard test harness."
+MUST_NOT "Change the parser behaviour."
+ACCEPT "All table cases pass with cargo test -p example-ledger."
+EVIDENCE "Test output listing the amount test names."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+---
+# category: documentation
+# expect: actionable
+R1 heldout-04
+OBJ "Write a CHANGELOG entry for the CSV trailing-comma fix in example-ledger."
+SCOPE "crates/example-ledger/CHANGELOG.md"
+DO "Add one bullet under the Unreleased heading describing the fix."
+MUST "Use the existing bullet style of the file."
+MUST_NOT "Describe changes that are not in the fix."
+ACCEPT "The Unreleased heading contains exactly one new bullet."
+PERM modify_files=permitted commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: repository-change
+# expect: actionable
+R1 heldout-05
+OBJ "Add an .editorconfig at the repository root that sets four-space indentation for Rust files and LF line endings."
+SCOPE "repository root"
+DO "Create .editorconfig with a section for *.rs files and a root=true header."
+MUST "Set end_of_line to lf for all files."
+MUST_NOT "Change the formatting of any existing source file."
+ACCEPT "The file exists and parses as an editorconfig with the requested settings."
+PERM modify_files=permitted commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: refactoring
+# expect: actionable
+R1 heldout-06
+OBJ "Replace the three duplicated error-to-text match blocks in example-ledger with one Display implementation on LedgerError."
+SCOPE "crates/example-ledger/src/error.rs"
+MUST "Keep every error message string identical."
+MUST_NOT "Change the public variants of LedgerError."
+SHOULD "Remove the now-unused helper functions."
+ACCEPT "cargo test -p example-ledger passes with no edits to test files."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+---
+# category: planning-analysis
+# expect: actionable
+R1 heldout-07
+OBJ "Outline the steps to move the serde dependency in example-ledger to the newest 1.x release."
+DO "List the steps in order, with the check to run after each one."
+MUST "Keep the public types serialisable to the same JSON shape."
+SHOULD "Keep the outline to six steps or fewer."
+ACCEPT "Each step names a concrete check."
+PERM modify_files=forbidden commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: api-design-review
+# expect: actionable
+R1 heldout-08
+OBJ "Review the fields of the Transaction struct in example-ledger and list which should become private behind accessor methods."
+SCOPE "crates/example-ledger/src/transaction.rs"
+DO "Give each field a verdict of keep public or make private, with a one-line reason."
+MUST_NOT "Modify any source file."
+SHOULD "Note any breaking change each verdict would cause."
+ACCEPT "Every field of Transaction has a verdict."
+PERM modify_files=forbidden commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: research-summary
+# expect: clarify
+R1 heldout-09
+OBJ "Compare two logging crates for example-service."
+DO "Summarise the differences in the reply."
+UNKNOWN "Which two logging crates are in scope?"
+ACCEPT "The summary covers configuration and performance trade-offs."
+PERM modify_files=forbidden commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: constraint-heavy
+# expect: clarify
+R1 heldout-10
+OBJ "Make the ledger export faster while keeping its files compatible."
+MUST "Keep exported files readable by the existing downstream importer."
+MUST_NOT "Change the column order of the export."
+SHOULD "Keep memory use roughly constant."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+---
+# category: ambiguous-clarify
+# expect: clarify
+R1 heldout-11
+OBJ "Tidy up the release process."
+UNKNOWN "Which steps of the release process are in scope?"
+PERM modify_files=permitted commit_changes=forbidden run_commands=forbidden network=forbidden
+---
+# category: ambiguous-clarify
+# expect: clarify
+R1 heldout-12
+OBJ "Sort out the benchmarks for example-ledger."
+DO "Make the benchmark results easier to compare."
+ACCEPT "A reader can compare two benchmark runs in one table."
+PERM modify_files=permitted commit_changes=forbidden run_commands=unspecified network=forbidden
+---
+# category: conflict-refusal
+# expect: refuse
+R1 heldout-13
+OBJ "Add an end-to-end test in example-service that calls the live payment sandbox."
+MUST "Allow outbound network calls from the example-service test suite."
+MUST_NOT "Allow outbound network calls from the example-service test suite."
+ACCEPT "The new test passes in CI."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=permitted
+---
+# category: conflict-refusal
+# expect: refuse
+R1 heldout-14
+OBJ "Set up the release job so every merge to main publishes the rosetta-core crate."
+MUST "Publish the crate to the public registry on every merge."
+MUST_NOT "Publish the crate to the public registry on every merge."
+ACCEPT "The release workflow file validates."
+PERM modify_files=permitted commit_changes=forbidden run_commands=forbidden network=forbidden

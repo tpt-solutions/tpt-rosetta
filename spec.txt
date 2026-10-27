@@ -1,0 +1,424 @@
+TPT-ROSETTA AI-Native Semantic Communication and Representation Design
+Specification Status: Initial proposal Version: 0.1.0 License target:
+MIT Implementation language: Rust Repository: tpt-solutions/tpt-rosetta
+
+1.  EXECUTIVE SUMMARY
+
+TPT Rosetta investigates whether AI requests can be represented more
+compactly and precisely than ordinary natural-language prompts, without
+reducing task success, correctness, or important nuance.
+
+The project will define a canonical, model-independent semantic
+representation for intent, constraints, relationships, references, and
+acceptance criteria. It will provide encoders that render this
+representation into alternative model-facing forms, including ordinary
+English, concise English, structured notation, and experimental symbolic
+notation.
+
+The central objective is not to make text look shorter. It is to reduce
+total cost per successful task while preserving meaning and reliability.
+
+Rosetta must begin as an evidence-driven research and engineering
+project. It must not assume that invented symbols, Unicode glyphs,
+shorter strings, or fewer apparent words automatically result in fewer
+model tokens or better outcomes.
+
+2.  PROBLEM STATEMENT
+
+Natural language is expressive and accessible, but recurring
+instructions often repeat the same concepts: preserve an API, obey
+constraints, use specific context, provide evidence, run tests, avoid
+unsafe code, or reject changes that fail acceptance criteria.
+
+Potential inefficiencies include: - Repeatedly explaining concepts whose
+meanings could be defined once. - Redundant phrasing and repeated
+context. - Ambiguous requirements and implicit assumptions. -
+Representations that are verbose for humans but expensive for models. -
+Inconsistent wording for semantically equivalent instructions. - Lack of
+measurable evidence about whether compression preserves intent.
+
+However, natural language can be highly efficient for familiar models
+and tasks. A short custom symbol can tokenize into multiple tokens, be
+unfamiliar to a model, or introduce ambiguity. Rosetta must compare
+alternatives empirically rather than presuppose a win.
+
+3.  PROJECT GOALS
+
+Primary goals: - Define a canonical semantic representation of AI task
+intent. - Represent goals, constraints, permissions, context references,
+uncertainty, dependencies, and acceptance criteria. - Translate
+natural-language task descriptions into the canonical representation
+where feasible. - Encode canonical tasks into multiple model-compatible
+formats. - Preserve meaning through explicit semantics, validation, and
+round-trip tests. - Measure token usage, task success, retries, latency,
+and cost per successful task. - Support reproducible comparisons across
+models and task categories. - Provide a reusable Rust library and CLI. -
+Integrate with TPT Weave and TPT Code Command Center through stable
+interfaces when justified.
+
+Secondary goals: - Explore domain-specific symbol vocabularies for
+recurring concepts. - Investigate model-specific encodings and compact
+textual forms. - Evaluate whether a notation can be learned in-context
+by existing LLMs without model retraining. - Maintain an extensible path
+towards future tokenizer or model-training experiments if evidence
+supports them.
+
+4.  NON-GOALS
+
+Rosetta is not initially intended to: - Replace human languages in
+general communication. - Replace TPT Script or become a general-purpose
+programming language. - Replace TPT-UIR’s computational intermediate
+representation. - Embed all workflow orchestration, repository indexing,
+or context retrieval functionality. - Require a custom LLM, tokenizer,
+or model training to be useful. - Assume binary serialization is
+directly suitable for ordinary text-based LLM APIs. - Guarantee fewer
+tokens for every model or task. - Treat syntactic brevity as proof of
+semantic equivalence. - Automatically execute instructions or modify
+repositories without the permissions of the host workflow.
+
+5.  ARCHITECTURAL BOUNDARIES
+
+TPT Rosetta: - Owns the semantic task schema, its definitions, notation
+experiments, encoders/decoders, validators, and benchmarks specific to
+representation quality. - Does not own repository indexing or context
+retrieval. - Does not own request interception, provider routing,
+credentials, or general AI workflow orchestration. - Does not own
+computational graphs or GPU execution semantics.
+
+Expected adjacent responsibilities: - TPT Weave: repository context
+retrieval, context selection, and composition. - TPT Code Command
+Center: request interception, provider/model interaction, and
+workflow-level request optimisation. - TPT-UIR: typed computational
+intermediate representation for computations, not a generic task-intent
+language. - TPT Telos: formal verification where supported by its proof
+model.
+
+These are proposed integration boundaries. Implementations must be
+checked before relying on any feature or integration being available.
+
+6.  CORE DESIGN PRINCIPLES
+
+6.1 Meaning before encoding Define what a task means independently from
+how it is written to a model.
+
+6.2 Multiple encodings A single canonical task may be rendered as
+natural language, concise natural language, structured text, or a
+symbolic notation.
+
+6.3 Model-aware, not model-dependent The core schema must not depend on
+one provider, tokenizer, or model family. Adapters may use
+model-specific tokenizers and measured encoding strategies.
+
+6.4 Explicit semantics Every operator, symbol, field, default, and
+constraint must have a documented meaning. Avoid relying on unexplained
+glyphs or implicit conventions.
+
+6.5 Fail safely If parsing, translation, or validation cannot preserve a
+requirement, return an explicit error or lower-confidence result. Do not
+silently discard constraints.
+
+6.6 Evidence over assumptions Optimise for successful task outcomes, not
+only prompt length.
+
+6.7 Human inspectability Developers must be able to inspect the
+canonical representation and understand why an encoding was generated.
+
+6.8 Security by default Treat input prompts, retrieved documents,
+repository content, and model outputs as untrusted data. A compact
+representation must not silently elevate permissions or override
+system-level policies.
+
+6.9 Incremental adoption Rosetta must be usable as a standalone library
+and CLI before deep integration with other TPT repositories.
+
+7.  CANONICAL SEMANTIC TASK MODEL
+
+The initial model should represent, at minimum:
+
+-   task identifier and schema version;
+-   objective or requested outcome;
+-   scope and target resources;
+-   constraints and prohibited actions;
+-   required actions or deliverables;
+-   context references;
+-   dependencies and preconditions;
+-   acceptance criteria;
+-   evidence requirements;
+-   uncertainty or unresolved questions;
+-   execution and modification permissions;
+-   optional budget, time, or token limits;
+-   provenance: source text, transformations, and confidence where
+    available.
+
+Illustrative conceptual example (not final syntax):
+
+task: objective: optimise scope: repository:tpt-math constraints: -
+preserve_public_api - unsafe_code: forbidden acceptance: - tests: pass -
+benchmarks: measurable_improvement policy: modify_files: permitted
+commit_changes: forbidden
+
+The canonical model must distinguish: - A requirement from a
+preference. - A hard constraint from a soft objective. - A known fact
+from an assumption. - A reference to context from copied context. - A
+proposed action from an authorised action. - A missing value from a
+default value. - A validated fact from a model-generated claim.
+
+The initial implementation should use a small, typed schema. Avoid
+designing an exhaustive ontology before benchmark results demonstrate
+what is needed.
+
+8.  REPRESENTATION AND ENCODING STRATEGY
+
+Rosetta should separate its canonical data model from surface encodings.
+
+Candidate encodings: A. Natural-language baseline. B. Concise natural
+language. C. Structured key/value or JSON-like form. D. Compact DSL with
+explicit operators. E. Experimental symbolic notation. F. Optional
+model-specific encoding selected by measured performance.
+
+A future implementation may include an encoder interface similar in
+concept to: - encode(task, target_profile) -> encoded_request -
+decode(encoded_request) -> parsed representation, where the format
+permits decoding - validate(task) -> diagnostics - compare(original,
+reconstructed) -> semantic differences
+
+These are conceptual interfaces, not a final API contract.
+
+Do not implement an encoding solely because it appears visually compact.
+Record actual tokenizer counts for the target model when a tokenizer is
+available. Where exact tokenizer access is unavailable, mark counts as
+estimated and do not compare them as if exact.
+
+Do not assume Unicode symbols are atomic tokens. Do not assume JSON is
+token-efficient. Do not assume one encoding is best for all models.
+
+9.  SEMANTIC VOCABULARY
+
+Begin with a small vocabulary of frequent task concepts, such as: -
+objective/action; - scope/reference; - must / must-not; - preserve /
+modify / replace; - dependency / ordering; - evidence / verification; -
+uncertainty / assumption; - success / failure condition; - confidence /
+provenance; - resource budget.
+
+Each symbol or operator must have: - a stable identifier; - a precise
+definition; - argument types and arity where applicable; - evaluation or
+interpretation rules; - a canonical readable name; - examples and
+counterexamples; - versioning and compatibility rules.
+
+Symbols must not be assigned meanings based only on visual similarity or
+an assumed universal interpretation. Ancient writing systems may inspire
+the project’s design philosophy, but Rosetta must not imply that
+historical scripts are inherently more efficient for LLMs.
+
+10. NATURAL-LANGUAGE TRANSLATION
+
+Translation from natural language to the canonical model is potentially
+lossy and must expose that fact.
+
+Requirements: - Preserve the original request for audit and
+comparison. - Identify extracted requirements, constraints, and
+assumptions. - Flag ambiguity and missing essential information. -
+Support a strict mode that refuses to emit a fully actionable task when
+required semantics are unresolved. - Distinguish model-inferred details
+from user-provided requirements. - Never silently convert a soft
+preference into a hard constraint or vice versa. - Provide a readable
+rendering of the parsed task for human review.
+
+Rosetta should initially permit manually authored canonical tasks. It
+must not depend entirely on an LLM to bootstrap or validate its own
+semantic interpretation.
+
+11. VALIDATION AND ROUND-TRIP SAFETY
+
+Implement schema validation and structural checks first. Later semantic
+checks may compare source requirements with reconstructed requirements.
+
+Tests must cover: - encode/decode round trips where supported; - stable
+canonicalisation; - unknown symbols and operators; - missing and extra
+fields; - conflicting constraints; - unsupported versions; - invalid
+references; - ambiguity handling; - preservation of negative
+requirements; - distinction between hard constraints and preferences; -
+Unicode normalization and escaping; - malformed or adversarial inputs.
+
+A syntactic round trip is not proof of semantic equivalence. Semantic
+preservation must also be tested against labelled examples and task
+outcomes.
+
+12. BENCHMARKING AND EVALUATION
+
+The benchmark harness is a core deliverable, not an afterthought.
+
+12.1 Task corpus Build a versioned corpus of representative tasks,
+initially including: - Rust coding and refactoring; - bug fixing; - test
+generation; - API and design review; - documentation; - repository-level
+changes; - research and summarisation; - planning and structured
+analysis; - constraint-heavy tasks; - ambiguous tasks that should
+trigger clarification.
+
+Use tasks with explicit acceptance criteria. Keep private credentials,
+personal data, and sensitive repository contents out of the benchmark
+corpus.
+
+12.2 Baselines Compare equivalent tasks using: - normal English; -
+concise English; - structured representation; - Rosetta DSL; -
+experimental symbolic representation.
+
+Keep task requirements, available context, model settings, and tool
+access equivalent wherever possible. Document unavoidable differences.
+
+12.3 Metrics Record: - input tokens; - output tokens; - total tokens; -
+exact tokenizer and model profile where available; - API cost when
+known; - latency; - successful completion rate; - acceptance-test pass
+rate; - semantic constraint violations; - retries and clarification
+turns; - failure categories; - estimated or measured cost per successful
+task.
+
+A useful primary metric is total cost per successful task, with quality
+and safety constraints. Token reduction alone is insufficient.
+
+12.4 Experimental discipline - Use repeated trials where model
+variability matters. - Report sample size and uncertainty. - Keep
+benchmark tasks and scoring rules versioned. - Separate results by model
+and task category. - Prevent the encoder from seeing hidden expected
+answers. - Include tasks where Rosetta is expected not to help. - Report
+regressions and inconclusive results. - Avoid claiming general
+superiority from a small or cherry-picked sample.
+
+13. MODEL AND TOKENIZER ADAPTERS
+
+Define a provider-neutral interface for model profiles and tokenizer
+measurement. Keep provider-specific API clients outside the core
+semantic schema where practical.
+
+A model profile may specify: - tokenizer identity and version; -
+supported input formats; - context limits; - available pricing data; -
+whether exact token counts are available; - known notation
+limitations; - encoding evaluation results.
+
+Do not assume a model’s tokenizer is public or available. If exact
+counting is impossible, mark the result accordingly. Provider routing
+and credential management belong in the appropriate host integration,
+not in Rosetta’s semantic core.
+
+14. SECURITY AND PERMISSIONS
+
+Rosetta represents requests; it does not grant authority.
+
+-   Encoding a request must not broaden its permissions.
+-   References to tools or resources are identifiers, not authorisation.
+-   Preserve explicit prohibitions through all transformations.
+-   Treat repository text and retrieved content as untrusted data.
+-   Do not interpret content embedded in a task as trusted system
+    policy.
+-   Avoid storing secrets in task corpora, traces, or benchmark outputs.
+-   Make transformations auditable and reproducible.
+-   Require host systems to enforce actual tool permissions and
+    execution policy.
+
+15. RUST IMPLEMENTATION AND REPOSITORY STRUCTURE
+
+Use a modular Rust workspace, keeping dependencies minimal and
+interfaces stable. The exact crate split should follow implementation
+needs rather than being fixed prematurely.
+
+Possible initial layout:
+
+/ Cargo.toml README.md LICENSE-MIT SPEC.txt TODO.md docs/
+architecture.md notation.md benchmark-methodology.md security.md crates/
+rosetta-core/ rosetta-parse/ rosetta-encode/ rosetta-bench/ examples/
+fixtures/ benches/
+
+This is a proposed layout. Start with fewer crates if the initial code
+does not justify the split. Keep the canonical data model independent of
+provider APIs.
+
+The core library should support deterministic parsing, validation,
+canonicalisation, and encoding. Network access should not be required
+for core tests. API-dependent benchmarks must be opt-in and must clearly
+identify any incurred cost.
+
+16. INTEGRATION PLAN
+
+TPT Weave: - Use Weave to supply selected repository context and
+existing retrieval results. - Evaluate whether context references can
+replace repeated context without making the model unable to access the
+referenced material. - Avoid duplicating Weave’s indexing, retrieval, or
+caching logic.
+
+TPT Code Command Center: - Add Rosetta as an optional transformation
+stage, not a mandatory path. - Compare end-to-end results against
+existing optimisation behavior. - Avoid double-counting savings from
+caching, context reduction, or summarisation. - Provide a safe fallback
+to the original prompt if encoding fails or is judged unsuitable.
+
+TPT-UIR: - Keep UIR as the computational IR. - Rosetta tasks may
+reference a UIR artifact or request generation of one. - Do not add
+generic agent workflow semantics to UIR core merely to support Rosetta.
+
+TPT Telos: - Explore formal validation of selected constraints only
+where a precise mapping and supported proof semantics exist. - Never
+label an ordinary LLM judgment as a formal proof.
+
+17. RELEASE AND ACCEPTANCE CRITERIA
+
+An initial research release is acceptable when: - The canonical schema
+is documented and versioned. - At least two alternative encodings are
+implemented in addition to an English baseline. - The benchmark harness
+can run reproducibly on a local, labelled task corpus. - Token counts
+identify the tokenizer and method used. - Task outcomes and constraint
+violations are scored, not merely token length. - Encoding failures have
+a documented safe fallback. - Core tests run without network access. -
+Security and limitations are documented. - No unsupported claims of
+universal token savings are made.
+
+A claim that Rosetta improves efficiency should only be made for the
+tested models, tasks, settings, and evaluation conditions. The release
+notes must state where results are mixed or negative.
+
+18. RISKS AND MITIGATIONS
+
+Risk: Symbolic text tokenizes poorly. Mitigation: Measure actual tokens
+and compare alternative encodings.
+
+Risk: The model does not understand the notation. Mitigation: Test
+in-context definitions, familiar operators, and model-specific
+encodings; retain a baseline fallback.
+
+Risk: Compression loses nuance. Mitigation: Use explicit typed fields,
+ambiguity diagnostics, semantic checks, and task acceptance tests.
+
+Risk: The project duplicates Weave or Command Center. Mitigation: Keep
+Rosetta focused on representation and evaluation, with thin integration
+interfaces.
+
+Risk: Benchmark overfitting. Mitigation: Maintain held-out tasks, report
+failures, and test across task categories and model families.
+
+Risk: A custom tokenizer is expensive to develop. Mitigation: Do not
+begin with tokenizer training; prove value using existing models first.
+
+Risk: Short notation creates false confidence. Mitigation: Make
+semantics explicit and separate structural validation from proof of task
+correctness.
+
+19. OPEN DESIGN QUESTIONS
+
+Resolve these through prototypes and evidence: - Should the canonical
+schema be a typed Rust model, a schema language, or both? - Which
+structured format is the strongest baseline? - Which symbol families are
+genuinely intuitive and compact across models? - Can a notation be
+defined in-context with low overhead, or does the definition erase token
+savings? - How much can context references reduce tokens while keeping
+required information accessible? - Which requirements can be checked
+mechanically? - Should model-specific encodings be generated dynamically
+or selected from measured profiles? - What minimum quality threshold is
+required before enabling Rosetta automatically in Command Center? - At
+what point, if any, would a custom tokenizer or fine-tuned model become
+worthwhile?
+
+20. GUIDING RULE
+
+Rosetta succeeds only if it communicates the right meaning more
+efficiently in real tasks. Fewer characters, fewer apparent words, and
+fewer tokens are useful only when the system preserves correctness,
+constraints, and task success.

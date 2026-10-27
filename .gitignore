@@ -1,0 +1,10 @@
+/target
+Cargo.lock.bak
+*.rs.bk
+
+# Editor and OS files
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

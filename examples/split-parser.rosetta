@@ -1,0 +1,16 @@
+# Example task. Try:
+#   rosetta validate examples/split-parser.rosetta
+#   rosetta encode examples/split-parser.rosetta --to concise
+#   rosetta encode examples/split-parser.rosetta --to dsl
+R1 split-parser-module
+OBJ "Split the DSL parser module into a lexer and a grammar file."
+SCOPE "crates/rosetta-encode"
+MUST_NOT "Change the public API of rosetta-encode."
+SHOULD "Keep each file under 400 lines."
+DO "Move the tokenizer into lexer.rs."
+CTX file:crates/rosetta-encode/src/dsl.rs
+ACCEPT "cargo test --workspace passes without changes to test files."
+EVIDENCE "Test output for rosetta-encode."
+PERM modify_files=permitted commit_changes=forbidden run_commands=permitted network=forbidden
+BUDGET tokens=20000
+SRC "Please split the DSL parser into a lexer and a grammar file without changing the public API."

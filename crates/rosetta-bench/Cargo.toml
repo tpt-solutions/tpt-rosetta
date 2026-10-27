@@ -1,0 +1,16 @@
+[package]
+name = "rosetta-bench"
+description = "Offline benchmark harness for TPT Rosetta (experimental)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+rosetta-core = { path = "../rosetta-core" }
+rosetta-encode = { path = "../rosetta-encode" }
+
+[lints]
+workspace = true

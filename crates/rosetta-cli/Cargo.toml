@@ -1,0 +1,21 @@
+[package]
+name = "rosetta-cli"
+description = "Command-line interface for TPT Rosetta (experimental)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "rosetta"
+path = "src/main.rs"
+
+[dependencies]
+rosetta-core = { path = "../rosetta-core" }
+rosetta-encode = { path = "../rosetta-encode" }
+rosetta-bench = { path = "../rosetta-bench" }
+
+[lints]
+workspace = true
