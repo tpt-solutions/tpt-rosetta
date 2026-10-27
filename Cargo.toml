@@ -13,7 +13,7 @@ edition = "2024"
 # Minimum supported Rust version. Not yet verified on this toolchain floor;
 # see docs/architecture.md.
 rust-version = "1.85"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/tpt-solutions/tpt-rosetta"
 publish = false
 

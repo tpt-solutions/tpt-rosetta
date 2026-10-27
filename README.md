@@ -96,4 +96,4 @@ measured results. See [todo.md](todo.md) for what remains.
 
 ## Licence
 
-Licensed under the MIT Licence. See [LICENSE-MIT](LICENSE-MIT).
+Licensed under either of the MIT Licence ([LICENSE-MIT](LICENSE-MIT)) or the Apache Licence, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE)), at your option.

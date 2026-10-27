@@ -1,6 +1,6 @@
 TPT-ROSETTA AI-Native Semantic Communication and Representation Design
 Specification Status: Initial proposal Version: 0.1.0 License target:
-MIT Implementation language: Rust Repository: tpt-solutions/tpt-rosetta
+MIT OR Apache-2.0 Implementation language: Rust Repository: tpt-solutions/tpt-rosetta
 
 1.  EXECUTIVE SUMMARY
 

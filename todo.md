@@ -9,7 +9,7 @@ is missing.
 Phase 0 --- Repository foundation
 - [ ] Create tpt-rosetta repository under tpt-solutions.
   Note: publishing, deliberately excluded. The repo is not a git repository yet.
-- [x] Add SPEC.txt, TODO.md, README.md, and MIT license.
+- [x] Add SPEC.txt, TODO.md, README.md, and MIT and Apache-2.0 licenses.
   Note: files are spec.txt and todo.md (lowercase), and the copyright holder
   "TPT Solutions" is an assumption to confirm.
 - [x] State clearly that Rosetta is experimental and makes no
