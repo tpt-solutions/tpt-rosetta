@@ -8,7 +8,8 @@ is missing.
 
 Phase 0 --- Repository foundation
 - [ ] Create tpt-rosetta repository under tpt-solutions.
-  Note: publishing, deliberately excluded. The repo is not a git repository yet.
+  Note: publishing, deliberately excluded. The repo is now a local git
+  repository (master), but it has no remote.
 - [x] Add SPEC.txt, TODO.md, README.md, and MIT and Apache-2.0 licenses.
   Note: files are spec.txt and todo.md (lowercase), and the copyright holder
   "TPT Solutions" is an assumption to confirm.
@@ -97,7 +98,9 @@ Phase 3 --- Initial encoders and parser
 Phase 4 --- Symbolic notation experiments
 Note: deferred. Measuring symbol cost needs a tokenizer or a model run, and
 neither is available here. The DSL uses ASCII keywords only.
-- [ ] Identify recurring semantic concepts from the benchmark corpus.
+- [x] Identify recurring semantic concepts from the benchmark corpus.
+  Note: clause and permission counts are in docs/concept-frequency.md. This is
+  a descriptive count of corpus v1, not a vocabulary.
 - [ ] Propose a small, versioned vocabulary for objectives,
   constraints, dependencies, evidence, uncertainty, and verification.
   Note: DSL 1 keywords cover these concepts, but this is not a symbolic
